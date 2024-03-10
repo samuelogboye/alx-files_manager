@@ -1,8 +1,9 @@
-import redis from 'redis';
+import { createClient } from 'redis';
+import { promisify } from 'util';
 
 class RedisClient {
   constructor () {
-    this.client = redis.createClient();
+    this.client = createClient();
 
     this.client.on('error', (err) =>
       console.error(`Redis client error: ${err}`)
@@ -13,31 +14,24 @@ class RedisClient {
     return this.client.connected;
   }
 
+  // get value for given key from redis server
   async get (key) {
-    return new Promise((resolve, reject) => {
-      this.client.get(key, (err, reply) => {
-        if (err) reject(err);
-        resolve(reply);
-      });
-    });
+    const redisGet = promisify(this.client.get).bind(this.client);
+    const value = await redisGet(key);
+    return value;
   }
 
-  async set (key, value, seconds) {
-    return new Promise((resolve, reject) => {
-      this.client.set(key, value, 'EX', seconds, (err, reply) => {
-        if (err) reject(err);
-        resolve(reply);
-      });
-    });
+  // set key value pair to redis server
+  async set (key, value, time) {
+    const redisSet = promisify(this.client.set).bind(this.client);
+    await redisSet(key, value);
+    await this.client.expire(key, time);
   }
 
+  // del key vale pair from redis server
   async del (key) {
-    return new Promise((resolve, reject) => {
-      this.client.del(key, (err, reply) => {
-        if (err) reject(err);
-        resolve(reply);
-      });
-    });
+    const redisDel = promisify(this.client.del).bind(this.client);
+    await redisDel(key);
   }
 }
 
