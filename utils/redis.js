@@ -1,5 +1,5 @@
-import { createClient } from 'redis';
-import { promisify } from 'util';
+const { createClient } = require('redis');
+const { promisify } = require('util');
 
 // class to define methods for commonly used redis commands
 class RedisClient {
@@ -8,6 +8,10 @@ class RedisClient {
     this.client.on('error', (err) =>
       console.error(`Redis client not connected to server: ${err}`)
     );
+    this.connected = false;
+    this.client.on('connect', () => {
+      this.connected = true;
+    });
   }
 
   // check if redis client is connected
@@ -25,8 +29,9 @@ class RedisClient {
   // set key value pair to redis server
   async set (key, value, time) {
     const redisSet = promisify(this.client.set).bind(this.client);
-    await redisSet(key, value);
-    await this.client.expire(key, time);
+    await redisSet(key, value, 'EX', time);
+    //     await redisSet(key, value);
+    //     await this.client.expire(key, time);
   }
 
   // del key vale pair from redis server
