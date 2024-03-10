@@ -1,15 +1,16 @@
 import { createClient } from 'redis';
 import { promisify } from 'util';
 
+// class to define methods for commonly used redis commands
 class RedisClient {
   constructor () {
     this.client = createClient();
-
     this.client.on('error', (err) =>
       console.error(`Redis client not connected to server: ${err}`)
     );
   }
 
+  // check if redis client is connected
   isAlive () {
     return this.client.connected;
   }
