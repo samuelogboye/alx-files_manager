@@ -15,6 +15,7 @@ class AuthController {
       return;
     }
     const token = getToken(authzHeader);
+
     if (!token) {
       res.status(401).json({ error: 'Unauthorized' });
       res.end();
