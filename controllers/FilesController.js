@@ -246,4 +246,4 @@ class FileController {
   }
 }
 
-export default FileController;
+module.exports = FileController;
